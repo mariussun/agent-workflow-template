@@ -25,6 +25,8 @@ const questions = [
   { key: 'CURRENT_PHASE_PRIORITIES', prompt: 'Current phase priorities (e.g., "Phase 0: Map view + shop listings"): ' },
   { key: 'NORTH_STAR_METRIC', prompt: 'North Star metric (e.g., "Weekly active users"): ' },
   { key: 'TECH_STACK', prompt: 'Tech stack (e.g., "Next.js + Prisma + PostgreSQL"): ' },
+  { key: 'INSTALL_COMMAND', prompt: 'Install command (e.g., "npm install", "yarn", "pnpm install"): ', default: 'npm install' },
+  { key: 'SETUP_COMMANDS', prompt: 'Setup commands (e.g., "cp .env.example .env.local\\nnpm run dev"): ', default: 'npm run dev' },
 ];
 
 const answers = {};
@@ -32,7 +34,7 @@ const answers = {};
 function ask(question) {
   return new Promise(resolve => {
     rl.question(question.prompt, answer => {
-      answers[question.key] = answer || `[${question.key}]`;
+      answers[question.key] = answer || question.default || `[${question.key}]`;
       resolve();
     });
   });
@@ -50,6 +52,7 @@ function ask(question) {
     console.log('\n✨ Customizing agent files...\n');
 
     // Set default values for optional placeholders
+    answers.NUM_AGENTS = answers.NUM_AGENTS || '5';
     answers.CODING_STANDARDS = answers.CODING_STANDARDS || 'Follow standard coding practices for your stack.';
     answers.ERROR_HANDLING = answers.ERROR_HANDLING || 'Use try-catch blocks, log errors, provide user-friendly messages.';
     answers.TESTING_STRATEGY = answers.TESTING_STRATEGY || 'Write unit tests for business logic, integration tests for APIs.';
@@ -68,9 +71,29 @@ function ask(question) {
     answers.DATABASE_OPS = answers.DATABASE_OPS || 'Run migrations, backup regularly, monitor performance.';
     answers.SCALING_STRATEGY = answers.SCALING_STRATEGY || 'Vertical scaling first, horizontal scaling when needed.';
     answers.DISASTER_RECOVERY = answers.DISASTER_RECOVERY || 'Daily backups, tested rollback procedures.';
+    
+    // CONTRIBUTING.md placeholders
+    answers.BRANCH_NAMING = answers.BRANCH_NAMING || '## Branch Naming\n\n```\nfeature/feature-name    # new feature\nfix/bug-description     # bug fix\ndocs/topic              # documentation\nrefactor/description    # refactor\n```';
+    answers.COMMIT_CONVENTION = answers.COMMIT_CONVENTION || '## Commit Message Convention\n\n```\nfeat: add new feature\nfix: correct bug\ndocs: update documentation\nrefactor: improve code structure\ntest: add tests\n```';
+    answers.PR_PROCESS = answers.PR_PROCESS || '## Pull Request Process\n\n1. Create feature branch\n2. Write or update tests\n3. Ensure tests pass\n4. Request review\n5. Merge after approval';
+    answers.CODE_STANDARDS = answers.CODE_STANDARDS || '## Code Standards\n\n- Follow language-specific best practices\n- Write clean, maintainable code\n- No secrets in code\n- Document complex logic';
+    answers.PROJECT_STRUCTURE = answers.PROJECT_STRUCTURE || '## Project Structure\n\nDocument your project structure here.';
+    answers.ENVIRONMENT_SETUP = answers.ENVIRONMENT_SETUP || '## Environment Setup\n\nDocument required environment variables in `.env.example`.';
+    answers.EXAMPLE_FEATURE_NAME = answers.EXAMPLE_FEATURE_NAME || 'User Profile Feature';
+    answers.EXAMPLE_USER_STORY = answers.EXAMPLE_USER_STORY || 'As a user, I want to view and edit my profile\nso that I can keep my information up to date.';
+    answers.EXAMPLE_GITHUB_ISSUE = answers.EXAMPLE_GITHUB_ISSUE || 'Issue #1: User profile page\nLabels: feature, frontend\n\nTechnical Requirements:\n- Create profile route\n- Add edit form\n- Implement validation';
+    answers.EXAMPLE_CODE_LANG = answers.EXAMPLE_CODE_LANG || 'typescript';
+    answers.EXAMPLE_IMPLEMENTATION = answers.EXAMPLE_IMPLEMENTATION || '// Implementation example\nexport function UserProfile() {\n  return <div>Profile</div>\n}';
+    answers.EXAMPLE_SECURITY_AUDIT = answers.EXAMPLE_SECURITY_AUDIT || 'Security Review:\n✅ Authorization checks present\n✅ Input validation complete';
+    answers.EXAMPLE_FIX = answers.EXAMPLE_FIX || '// Fixed implementation\nexport function UserProfile() {\n  // Security fix applied\n  return <div>Profile</div>\n}';
+    answers.EXAMPLE_PO_QUESTION = answers.EXAMPLE_PO_QUESTION || 'Is this feature a priority for users?';
+    answers.EXAMPLE_ARCH_QUESTION = answers.EXAMPLE_ARCH_QUESTION || 'Should we use REST or GraphQL for this API?';
+    answers.EXAMPLE_TL_REQUEST = answers.EXAMPLE_TL_REQUEST || 'Please implement issue #8';
+    answers.EXAMPLE_TESTER_REQUEST = answers.EXAMPLE_TESTER_REQUEST || 'Audit the authentication flow for vulnerabilities';
 
-    // Replace placeholders in all agent files
+    // Replace placeholders in all agent files AND CONTRIBUTING.md
     const agentDir = path.join(__dirname, '..', '.github', 'agents');
+    const rootDir = path.join(__dirname, '..');
     
     if (!fs.existsSync(agentDir)) {
       console.error('❌ Error: .github/agents directory not found');
@@ -78,10 +101,12 @@ function ask(question) {
       process.exit(1);
     }
 
-    const files = fs.readdirSync(agentDir);
+    const agentFiles = fs.readdirSync(agentDir);
+    const contributingFile = path.join(rootDir, 'CONTRIBUTING.md');
     let filesProcessed = 0;
 
-    files.forEach(file => {
+    // Process agent files
+    agentFiles.forEach(file => {
       const filePath = path.join(agentDir, file);
       let content = fs.readFileSync(filePath, 'utf8');
       
@@ -96,7 +121,21 @@ function ask(question) {
       console.log(`   ✓ ${file}`);
     });
 
-    console.log(`\n✅ Success! Customized ${filesProcessed} agent files for ${answers.PROJECT_NAME}\n`);
+    // Process CONTRIBUTING.md
+    if (fs.existsSync(contributingFile)) {
+      let content = fs.readFileSync(contributingFile, 'utf8');
+      
+      Object.entries(answers).forEach(([key, value]) => {
+        const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+        content = content.replace(placeholder, value);
+      });
+
+      fs.writeFileSync(contributingFile, content);
+      filesProcessed++;
+      console.log(`   ✓ CONTRIBUTING.md`);
+    }
+
+    console.log(`\n✅ Success! Customized ${filesProcessed} files for ${answers.PROJECT_NAME}\n`);
     console.log('📝 Next steps:');
     console.log('   1. Review the agents in .github/agents/');
     console.log('   2. Update any remaining placeholders manually');

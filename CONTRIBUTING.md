@@ -1,71 +1,27 @@
-# MoveOn — Contributing Guide
+# {{PROJECT_NAME}} — Contributing Guide
 
-Thank you for contributing to MoveOn!
+Thank you for contributing to {{PROJECT_NAME}}!
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/mariussun/moveon.git
-cd moveon
-npm install
-cp .env.example .env.local
-# Fill in your API keys in .env.local
-npm run dev
+git clone https://github.com/{{GITHUB_OWNER}}/{{GITHUB_REPO}}.git
+cd {{GITHUB_REPO}}
+{{INSTALL_COMMAND}}
+{{SETUP_COMMANDS}}
 ```
 
-## Branch Naming
+{{BRANCH_NAMING}}
 
-```
-feature/E-01-medical-onboarding    # new feature (reference epic)
-fix/today-streak-counter           # bug fix
-docs/update-architecture           # documentation
-refactor/exercise-card-component   # refactor
-```
+{{COMMIT_CONVENTION}}
 
-## Commit Message Convention
+{{PR_PROCESS}}
 
-```
-feat(E-01): add medical document upload
-fix(E-04): correct streak reset on timezone change
-docs: update architecture diagram
-refactor(E-03): extract ExerciseCard component
-test(E-02): add plan generation unit tests
-```
+{{CODE_STANDARDS}}
 
-## Pull Request Process
+{{PROJECT_STRUCTURE}}
 
-1. Branch off `develop` (not `main`)
-2. Write or update tests for your change
-3. Ensure `npm run lint` and `npm run typecheck` pass with no errors
-4. Fill in the PR template fully
-5. Request review from @mariussun
-6. Squash merge after approval
-
-## Code Standards
-
-- TypeScript strict mode — no `any` unless absolutely necessary with a comment explaining why
-- No secrets or API keys in code — use environment variables
-- No `console.log` in committed code — use the Fastify logger in API, remove debug logs from frontend
-- Components in `apps/web/src/components/` — keep them small and focused
-- Server vs Client components — default to Server Components; add `'use client'` only when needed
-
-## Package Structure
-
-| Package | Purpose |
-|---------|---------|
-| `apps/web` | Next.js frontend — pages, layouts, client components |
-| `apps/mobile` | React Native app (future) |
-| `packages/api` | Fastify REST API — all business logic |
-| `packages/ai` | Claude API integration — plan generation, medical parsing |
-| `packages/db` | Prisma schema, migrations, DB client singleton |
-
-## Environment Setup
-
-All required environment variables are documented in `.env.example`.
-The minimum set to run locally:
-- `DATABASE_URL` — PostgreSQL connection string
-- `CLERK_SECRET_KEY` + `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — auth
-- `ANTHROPIC_API_KEY` — AI features
+{{ENVIRONMENT_SETUP}}
 
 ## Questions?
 
@@ -75,9 +31,9 @@ Open a GitHub Discussion or create an issue with the `question` label.
 
 ## Agent Collaboration Workflow
 
-MoveOn uses a **4-agent ecosystem** for development. Each agent has a specific role and works together to deliver features from idea to production.
+{{PROJECT_NAME}} uses a **{{NUM_AGENTS}}-agent ecosystem** for development. Each agent has a specific role and works together to deliver features from idea to production.
 
-### The Four Agents
+### The Agents
 
 | Agent | Role | When to Invoke |
 |-------|------|---------------|
@@ -85,6 +41,7 @@ MoveOn uses a **4-agent ecosystem** for development. Each agent has a specific r
 | **Architect** | System design, GitHub governance, technical decisions | Architecture reviews, milestone planning, tech stack decisions, API design |
 | **TechLead** | Implementation, code quality, bug fixes, orchestration | Feature implementation, bug fixes, refactoring, performance optimization |
 | **Tester** | Security audits, edge cases, chaos engineering | Security reviews, penetration testing, stress testing, finding vulnerabilities |
+| **DevOps** | CI/CD, deployment, monitoring, infrastructure (Phase 2+) | Deployment pipelines, infrastructure setup, monitoring configuration |
 
 ### Development Lifecycle
 
@@ -119,72 +76,31 @@ MoveOn uses a **4-agent ecosystem** for development. Each agent has a specific r
 └──────────────┘
 ```
 
-### Example Workflow: Medical Profile Form
+### Example Workflow: {{EXAMPLE_FEATURE_NAME}}
 
 **1. ProductOwner writes user story:**
 ```
-As a new user with diabetes, I want to input my medical conditions and fitness level
-so that the AI can generate a safe, personalized exercise plan.
-
-Acceptance Criteria:
-- User can select chronic conditions (diabetes, hypertension, arthritis)
-- User inputs age, weight, height, current fitness level
-- Form validates required fields
-- Data saves successfully
-- User sees confirmation message
+{{EXAMPLE_USER_STORY}}
 ```
 
 **2. Architect creates GitHub issue:**
 ```
-Issue #6: Medical profile onboarding form
-Labels: phase-0, feature, frontend, db, p0-critical
-
-Technical Requirements:
-- Route: /profile/medical (Next.js App Router)
-- Server Action for form submission (no REST API)
-- Prisma model: MedicalProfile (1:1 with User)
-- Validation: zod schema
-- Auth: Clerk userId from auth()
-
-Dependencies: #1 (schema), #3 (auth)
-Estimate: 3 days
+{{EXAMPLE_GITHUB_ISSUE}}
 ```
 
 **3. TechLead implements:**
-```typescript
-// apps/web/src/app/(app)/profile/medical/page.tsx
-export default async function MedicalProfilePage() {
-  const { userId } = await auth()
-  const profile = await db.medicalProfile.findUnique({ where: { userId } })
-  return <MedicalProfileForm initialData={profile} />
-}
-
-// Server Action
-'use server'
-export async function updateMedicalProfile(formData: FormData) {
-  const { userId } = await auth()
-  const data = medicalProfileSchema.parse(Object.fromEntries(formData))
-  await db.medicalProfile.upsert({ where: { userId }, update: data, create: { userId, ...data } })
-  revalidatePath('/profile/medical')
-}
+```{{EXAMPLE_CODE_LANG}}
+{{EXAMPLE_IMPLEMENTATION}}
 ```
 
 **4. Tester audits security:**
 ```
-Security Review #6:
-✅ Authorization: Clerk userId prevents users editing others' profiles
-✅ Input validation: zod schema validates all inputs
-⚠️ S-04 Finding: chronicConditions field allows arbitrary strings
-   → Recommendation: Restrict to enum ['diabetes', 'hypertension', 'arthritis']
+{{EXAMPLE_SECURITY_AUDIT}}
 ```
 
 **5. TechLead fixes findings:**
-```typescript
-const chronicConditionsEnum = z.enum(['diabetes', 'hypertension', 'arthritis', 'none'])
-const medicalProfileSchema = z.object({
-  chronicConditions: z.array(chronicConditionsEnum),
-  // ... rest of schema
-})
+```{{EXAMPLE_CODE_LANG}}
+{{EXAMPLE_FIX}}
 ```
 
 **6. Architect approves merge → ProductOwner validates feature**
@@ -194,13 +110,13 @@ const medicalProfileSchema = z.object({
 In your commits, PRs, or comments, you can tag agents:
 
 ```markdown
-@ProductOwner: Is a 10-second AI generation time acceptable for users?
+@ProductOwner: {{EXAMPLE_PO_QUESTION}}
 
-@Architect: Should we use REST API or Server Actions for plan generation?
+@Architect: {{EXAMPLE_ARCH_QUESTION}}
 
-@TechLead: Please implement issue #8 (daily tracker component)
+@TechLead: {{EXAMPLE_TL_REQUEST}}
 
-@Tester: Audit the file upload feature for security vulnerabilities
+@Tester: {{EXAMPLE_TESTER_REQUEST}}
 ```
 
 ### Decision Escalation
@@ -230,17 +146,17 @@ Different types of work require different agent collaboration flows. Use this ma
 
 | Scenario | Workflow | Duration | Agents | Example Prompt |
 |----------|----------|----------|--------|----------------|
-| **New feature** | Full Feature Flow | 2-4 hours | PO → Arch → TL → Test → TL → Arch → PO | *"Build workout history dashboard. Use full feature flow."* |
-| **Bug fix** | Bug Fix Flow | 30 min | Test → TL → Test | *"Timer doesn't reset after workout. Use bug fix flow."* |
+| **New feature** | Full Feature Flow | 2-4 hours | PO → Arch → TL → Test → TL → Arch → PO | *"Build user dashboard. Use full feature flow."* |
+| **Bug fix** | Bug Fix Flow | 30 min | Test → TL → Test | *"Button doesn't submit form. Use bug fix flow."* |
 | **Security issue** | Security Audit Flow | 1-2 hours | Test → Arch → TL → Test | *"Audit authentication for vulnerabilities. Security flow."* |
-| **Tech decision** | Research Flow | 1 hour | PO → Arch → PO | *"Should we use WebSockets or SSE? Research flow."* |
+| **Tech decision** | Research Flow | 1 hour | PO → Arch → PO | *"Should we use REST or GraphQL? Research flow."* |
 | **Typo/UI tweak** | Quick Fix Flow | 5 min | TL only | *"TechLead: fix typo in welcome message (quick fix)."* |
 | **Performance** | Performance Flow | 1-2 hours | Test → Arch → TL → Test | *"API is slow. Use performance flow to optimize."* |
-| **Code quality** | Refactoring Flow | 1 hour | Arch → TL → Arch | *"Refactor Server Actions to reduce duplication."* |
+| **Code quality** | Refactoring Flow | 1 hour | Arch → TL → Arch | *"Refactor API routes to reduce duplication."* |
 | **Production down** | Hotfix Flow | 15 min | TL → Test → Arch | *"HOTFIX: Users can't sign in. Emergency fix needed."* |
-| **Documentation** | Documentation Flow | 30 min | PO → Arch → PO | *"Document the medical profile API. Documentation flow."* |
+| **Documentation** | Documentation Flow | 30 min | PO → Arch → PO | *"Document the user API. Documentation flow."* |
 | **Infrastructure** | DevOps Flow | 2-3 hours | Arch → DevOps → Test → Arch | *"Set up CI/CD pipeline. DevOps flow."* (Phase 2+) |
-| **API design** | API Design Flow | 1 hour | PO → Arch → Test → PO | *"Design workout session API. API design flow."* |
+| **API design** | API Design Flow | 1 hour | PO → Arch → Test → PO | *"Design user profile API. API design flow."* |
 
 ---
 
@@ -263,11 +179,11 @@ ProductOwner → Architect → TechLead → Tester → TechLead (fixes) → Arch
 
 **Example prompts:**
 ```
-"Build a workout history page where users can see past sessions. Use full feature flow."
+"Build a user dashboard with activity feed. Use full feature flow."
 
-"Implement social features (follow friends, share workouts). Full feature flow."
+"Implement social features (follow/unfollow users). Full feature flow."
 
-"Add AI-powered exercise recommendations. Use complete workflow."
+"Add AI-powered content recommendations. Use complete workflow."
 ```
 
 **When to skip:** Simple bug fixes, typos, minor UI tweaks
@@ -290,11 +206,11 @@ Tester (reproduce) → TechLead (fix + test) → Tester (verify) → ✅ Merge
 
 **Example prompts:**
 ```
-"Bug: Workout timer doesn't reset after completion. Use bug fix flow."
+"Bug: Form submit button doesn't work after validation error. Use bug fix flow."
 
-"Users can't delete their medical profile. Bug fix flow."
+"Users can't delete their account. Bug fix flow."
 
-"Exercise images not loading on mobile. Fix using bug flow."
+"Images not loading on mobile. Fix using bug flow."
 ```
 
 **When to skip:** Use full flow if bug fix requires architectural changes
@@ -322,7 +238,7 @@ Tester (audit) → Architect (assess) → TechLead (harden) → Tester (verify) 
 
 "Pre-launch security review before going public. Use security flow."
 
-"HIPAA compliance audit for medical data handling. Security audit flow."
+"Compliance audit for user data handling. Security audit flow."
 ```
 
 **When to use:** Always before major releases, quarterly security reviews, after incidents
@@ -350,7 +266,7 @@ ProductOwner (problem) → Architect (research) → Architect (write ADR) → Pr
 
 "WebSockets vs Server-Sent Events for real-time updates. Research flow."
 
-"Which AI model for exercise recommendations (Claude vs GPT-4)? Research flow."
+"Which AI model for content generation (Claude vs GPT-4)? Research flow."
 ```
 
 **Output:** ADR document in `docs/adr/`, GitHub issue for implementation
@@ -403,7 +319,7 @@ Tester (profile) → Architect (identify) → TechLead (optimize) → Tester (be
 
 **Example prompts:**
 ```
-"Medical profile form is slow to submit. Performance flow."
+"User profile form is slow to submit. Performance flow."
 
 "Dashboard takes 5 seconds to load. Use performance optimization flow."
 
@@ -430,11 +346,11 @@ Architect (identify) → TechLead (refactor) → Architect (review) → ✅ Merg
 
 **Example prompts:**
 ```
-"Refactor Server Actions to reduce duplication. Refactoring flow."
+"Refactor API routes to reduce duplication. Refactoring flow."
 
 "Extract reusable components from dashboard. Use refactoring flow."
 
-"Simplify Prisma queries using with() syntax. Refactoring flow."
+"Simplify database queries using ORM features. Refactoring flow."
 ```
 
 **Rules:**
@@ -465,7 +381,7 @@ Architect (identify) → TechLead (refactor) → Architect (review) → ✅ Merg
 
 "Production database timeout. Immediate hotfix required."
 
-"Medical profiles not saving. URGENT hotfix."
+"User data not saving. URGENT hotfix."
 ```
 
 **Criteria:**
@@ -491,11 +407,11 @@ ProductOwner (define) → Architect (write) → ProductOwner (review) → ✅ Me
 
 **Example prompts:**
 ```
-"Document the medical profile API endpoints. Documentation flow."
+"Document the user profile API endpoints. Documentation flow."
 
 "Write onboarding guide for new developers. Documentation flow."
 
-"Update README with Phase 1 roadmap. Documentation flow."
+"Update README with project roadmap. Documentation flow."
 ```
 
 **Deliverables:** Markdown docs in `docs/`, updated README, API documentation
@@ -547,11 +463,11 @@ ProductOwner (use cases) → Architect (design schema) → Tester (security revi
 
 **Example prompts:**
 ```
-"Design API for exercise tracking (JSON endpoints). API design flow."
+"Design API for user activity tracking (JSON endpoints). API design flow."
 
-"Design GraphQL schema for workout sessions. API design flow."
+"Design GraphQL schema for user sessions. API design flow."
 
-"ProductOwner + Architect: design session management API."
+"ProductOwner + Architect: design authentication API."
 ```
 
 **Deliverables:** OpenAPI spec, API documentation, Postman collection
@@ -575,7 +491,7 @@ ProductOwner (use cases) → Architect (design schema) → Tester (security revi
 ### In Chat/Commands:
 
 ```
-"Build exercise progress charts. Use full feature flow."
+"Build user activity charts. Use full feature flow."
 
 "API latency is high. Use performance optimization flow."
 
@@ -587,13 +503,13 @@ ProductOwner (use cases) → Architect (design schema) → Tester (security revi
 ```
 @ProductOwner: Define user story for social features
 
-@Architect: Design database schema for workout history
+@Architect: Design database schema for user activity
 
 @TechLead: Implement issue #22 (rate limiting)
 
 @Tester: Security audit the file upload feature
 
-@DevOps: Set up staging environment (Phase 2)
+@DevOps: Set up staging environment
 ```
 
 ---
