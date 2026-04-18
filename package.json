@@ -1,0 +1,11 @@
+{
+  "name": "agent-workflow-template",
+  "version": "1.0.0",
+  "description": "Reusable agent workflow template for AI-assisted development",
+  "scripts": {
+    "setup-agents": "node scripts/setup-agents.js"
+  },
+  "keywords": ["agents", "copilot", "workflow", "template"],
+  "author": "Marius Sun",
+  "license": "MIT"
+}
